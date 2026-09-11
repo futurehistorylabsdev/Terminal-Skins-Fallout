@@ -15,6 +15,12 @@
 * grille/switch cluster is just a big press area over the same
 * pushToTalk.startPushToTalk()/stopPushToTalk() calls (Command+Option still
 * works too, handled entirely on the C++ side).
+*
+* Modified 2026 by Future History Labs: colors here come from the
+* enclosing TerminalWindow's per-window effective color (terminalWindow.
+* effectiveFontColor/effectiveBackgroundColor/liveTool), not appSettings
+* directly, so each window's intercom panel follows that window's own
+* live claude/codex/other tool instead of a value shared across windows.
 *******************************************************************************/
 import QtQuick
 import QtQuick.Controls
@@ -38,7 +44,7 @@ Rectangle {
         triggeredOnStart: true
         onTriggered: {
             if (root.session)
-                appSettings.updateActiveToolFromProcessName(root.session.foregroundProcessName)
+                terminalWindow.updateLiveTool(root.session.foregroundProcessName)
         }
     }
 
@@ -47,7 +53,7 @@ Rectangle {
     readonly property color housingLight: Qt.lighter(housingColor, 1.6)
     readonly property color metalHi: "#cfd0b8"
     readonly property color metalLo: "#4a4a3e"
-    readonly property color termColor: appSettings.fontColor
+    readonly property color termColor: terminalWindow.effectiveFontColor
 
     implicitHeight: 210
     radius: 3
@@ -77,7 +83,7 @@ Rectangle {
     // Backlit terminal-style title readout — reflects whichever CLI is
     // actually running.
     readonly property string toolLabel: {
-        var tool = appSettings.liveTool
+        var tool = terminalWindow.liveTool
         if (tool === "claude") return "C L A U D E   T E R M - L I N K"
         if (tool === "codex") return "C O D E X   T E R M - L I N K"
         return "T E R M - L I N K"
@@ -239,7 +245,7 @@ Rectangle {
                     anchors.fill: parent
                     anchors.margins: 6
                     radius: 2
-                    color: Qt.darker(appSettings.backgroundColor, 1.1)
+                    color: Qt.darker(terminalWindow.effectiveBackgroundColor, 1.1)
                     border.color: "black"
                     border.width: 1
 
@@ -251,12 +257,12 @@ Rectangle {
                         TextArea {
                             id: promptField
                             placeholderText: qsTr("Type a prompt…")
-                            placeholderTextColor: Qt.rgba(appSettings.fontColor.r, appSettings.fontColor.g, appSettings.fontColor.b, 0.4)
+                            placeholderTextColor: Qt.rgba(root.termColor.r, root.termColor.g, root.termColor.b, 0.4)
                             wrapMode: TextArea.Wrap
                             selectByMouse: true
                             font.family: "monospace"
                             font.pixelSize: 15
-                            color: appSettings.fontColor
+                            color: root.termColor
                             background: null
 
                             Keys.onPressed: function (event) {
@@ -368,7 +374,7 @@ Rectangle {
                                 width: lampHousing.width * haloScale
                                 height: lampHousing.height * haloScale
                                 radius: width / 2
-                                color: appSettings.fontColor
+                                color: root.termColor
                                 opacity: root.listening ? (0.22 - index * 0.06) : 0
                                 Behavior on opacity { NumberAnimation { duration: 150 } }
                             }
@@ -380,7 +386,7 @@ Rectangle {
                             radius: width / 2
                             border.color: "#161616"
                             border.width: 1.5
-                            color: root.listening ? appSettings.fontColor : Qt.darker(appSettings.fontColor, 3.4)
+                            color: root.listening ? root.termColor : Qt.darker(root.termColor, 3.4)
 
                             SequentialAnimation on opacity {
                                 running: root.listening

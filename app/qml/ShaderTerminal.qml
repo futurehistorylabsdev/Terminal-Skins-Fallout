@@ -2,6 +2,12 @@
 * Copyright (c) 2013-2021 "Filippo Scognamiglio"
 * https://github.com/Swordfish90/cool-retro-term
 *
+* Modified 2026 by Future History Labs: read the final font/background/
+* chroma color from the enclosing TerminalWindow's per-window
+* effectiveFontColor/effectiveBackgroundColor/effectiveChromaColor
+* instead of appSettings directly, so each window can show its own live
+* claude/codex/other color independently.
+*
 * This file is part of cool-retro-term.
 *
 * cool-retro-term is free software: you can redistribute it and/or modify
@@ -27,7 +33,7 @@ Item {
         var rasterMode = appSettings.rasterization;
         var burnInOn = appSettings.burnIn > 0 ? 1 : 0;
         var frameOn = appSettings.frameEnabled ? 1 : 0;
-        var chromaOn = appSettings.chromaColor > 0 ? 1 : 0;
+        var chromaOn = terminalWindow.effectiveChromaColor > 0 ? 1 : 0;
         return "qrc:/shaders/terminal_dynamic_raster" + rasterMode +
                "_burn" + burnInOn +
                "_frame" + frameOn +
@@ -51,13 +57,13 @@ Item {
     property BurnInEffect burnInEffect
     property ShaderEffectSource bloomSource
 
-    property color fontColor: appSettings.fontColor
-    property color backgroundColor: appSettings.backgroundColor
+    property color fontColor: terminalWindow.effectiveFontColor
+    property color backgroundColor: terminalWindow.effectiveBackgroundColor
 
     property real screenCurvature: appSettings.screenCurvature * appSettings.screenCurvatureSize * terminalWindow.normalizedWindowScale
     property real frameSize: appSettings.frameSize * terminalWindow.normalizedWindowScale
 
-    property real chromaColor: appSettings.chromaColor
+    property real chromaColor: terminalWindow.effectiveChromaColor
 
     property real ambientLight: appSettings.ambientLight * 0.2
 
@@ -174,7 +180,7 @@ Item {
 
         property real screenCurvature: parent.screenCurvature
 
-        property real chromaColor: appSettings.chromaColor;
+        property real chromaColor: terminalWindow.effectiveChromaColor;
 
         property real rgbShift: appSettings.rgbShift * (4.0 / width) * appSettings.totalFontScaling
 

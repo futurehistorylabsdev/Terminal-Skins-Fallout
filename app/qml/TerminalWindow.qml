@@ -3,7 +3,10 @@
 * https://github.com/Swordfish90/cool-retro-term
 *
 * Modified 2026 by Future History Labs: docked the new PromptBar
-* underneath the terminal.
+* underneath the terminal, and added per-window live claude/codex/other
+* color tracking (liveTool/effectiveFontColor/updateLiveTool below) so
+* multiple windows running different tools each show their own color
+* instead of fighting over one shared setting.
 *
 * This file is part of cool-retro-term.
 *
@@ -26,6 +29,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import "menus"
+import "utils.js" as Utils
 
 ApplicationWindow {
     id: terminalWindow
@@ -49,6 +53,35 @@ ApplicationWindow {
     menuBar: WindowMenu { }
 
     property real normalizedWindowScale: 1024 / ((0.5 * width + 0.5 * height))
+
+    // Modified 2026 by Future History Labs: this window's own live tool
+    // color, kept separate from appSettings' shared/persisted profile
+    // colors so a second window running a different tool doesn't fight
+    // this one over a single shared value (see PromptBar's polling timer,
+    // which calls updateLiveTool() with its session's foreground process
+    // name). Mirrors ApplicationSettings.qml's own fontColor/backgroundColor
+    // mix formula, just fed this window's tool color instead of the shared
+    // _fontColor, so the CRT look (contrast, background tint) matches
+    // exactly - only which color is live differs per window.
+    property string liveTool: "other"
+    readonly property bool toolColorActive: !appSettings.explicitProfileSelected
+    readonly property string _effectiveRawFontColor: toolColorActive
+        ? appSettings.toolColors[liveTool] : appSettings._fontColor
+    readonly property real effectiveChromaColor: toolColorActive ? 0.0 : appSettings.chromaColor
+    readonly property real effectiveSaturationColor: toolColorActive ? 0.0 : appSettings.saturationColor
+    readonly property color _effectiveSaturatedColor: Utils.mix(
+        Utils.strToColor(_effectiveRawFontColor), Utils.strToColor("#FFFFFF"),
+        (effectiveSaturationColor * 0.5))
+    readonly property color effectiveFontColor: Utils.mix(
+        Utils.strToColor(appSettings._backgroundColor), _effectiveSaturatedColor,
+        (0.7 + (appSettings.contrast * 0.3)))
+    readonly property color effectiveBackgroundColor: Utils.mix(
+        _effectiveSaturatedColor, Utils.strToColor(appSettings._backgroundColor),
+        (0.7 + (appSettings.contrast * 0.3)))
+
+    function updateLiveTool(processName) {
+        liveTool = appSettings.detectToolFromProcessName(processName)
+    }
 
     color: "#00000000"
 

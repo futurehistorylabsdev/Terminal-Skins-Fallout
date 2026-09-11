@@ -2,6 +2,10 @@
 * Copyright (c) 2013-2021 "Filippo Scognamiglio"
 * https://github.com/Swordfish90/cool-retro-term
 *
+* Modified 2026 by Future History Labs: read _backgroundColor/_fontColor
+* from the enclosing TerminalWindow's per-window effective colors, so the
+* bezel's ambient phosphor tint follows this window's own live tool color.
+*
 * This file is part of cool-retro-term.
 *
 * cool-retro-term is free software: you can redistribute it and/or modify
@@ -23,8 +27,8 @@ import "utils.js" as Utils
 
 ShaderEffect {
     property color _staticFrameColor: Utils.sum(appSettings.frameColor, Qt.rgba(0.1, 0.1, 0.1, 1.0))
-    property color _backgroundColor: appSettings.backgroundColor
-    property color _fontColor: appSettings.fontColor
+    property color _backgroundColor: terminalWindow.effectiveBackgroundColor
+    property color _fontColor: terminalWindow.effectiveFontColor
     property color _lightColor: Utils.mix(_fontColor, _backgroundColor, 0.2)
 
     property color frameColor: Utils.mix(

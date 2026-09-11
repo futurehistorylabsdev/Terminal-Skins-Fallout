@@ -3,8 +3,12 @@
 * https://github.com/Swordfish90/cool-retro-term
 *
 * Modified 2026 by Future History Labs: added the push-to-talk setting
-* and the live claude/codex/other tool-color scheme (see toolColors,
-* liveTool, applyToolColorScheme, detectToolFromProcessName below).
+* and the shared bits of the live claude/codex/other tool-color scheme
+* (toolColors, detectToolFromProcessName, explicitProfileSelected below).
+* The actual live state (which tool, and the resulting color) lives on
+* each TerminalWindow instead of here, so multiple windows running
+* different tools don't fight over one shared color - see
+* TerminalWindow.qml's liveTool/effectiveFontColor.
 *
 * This file is part of cool-retro-term.
 *
@@ -868,18 +872,21 @@ QtObject {
 
     // Which phosphor color to use for which CLI, keeping everything else
     // (curvature, scanlines, bloom, burn-in...) exactly as configured —
-    // only the color changes. "activeTool" is set once by main.cpp from
-    // whichever command the app itself launched; "liveTool" tracks
-    // whatever is actually running in the terminal's foreground right
-    // now (see PromptBar's polling timer), so the scheme keeps following
-    // you if you start/stop claude or codex from inside a plain shell.
+    // only the color changes. Shared read-only data/logic; each
+    // TerminalWindow tracks its own liveTool (see updateLiveTool() and
+    // effectiveFontColor there) from its own session's foreground process,
+    // so two windows running different tools each show their own color
+    // instead of overwriting one shared setting.
     readonly property var toolColors: ({
         "claude": "#ff8100",
         "codex": "#39ff14",
         "other": "#e8e8e8"
     })
 
-    property string liveTool: (typeof activeTool !== "undefined" && toolColors[activeTool]) ? activeTool : "other"
+    // Set from Component.onCompleted below when -p/--profile is given
+    // explicitly: windows then keep that static profile's color instead
+    // of following the live tool.
+    property bool explicitProfileSelected: false
 
     function detectToolFromProcessName(name) {
         if (!name)
@@ -890,21 +897,6 @@ QtObject {
         if (lower.indexOf("codex") !== -1)
             return "codex"
         return "other"
-    }
-
-    function updateActiveToolFromProcessName(name) {
-        var tool = detectToolFromProcessName(name)
-        if (tool === liveTool)
-            return
-        liveTool = tool
-        applyToolColorScheme()
-    }
-
-    function applyToolColorScheme() {
-        var tool = toolColors[liveTool] ? liveTool : "other"
-        _fontColor = toolColors[tool]
-        chromaColor = 0.0
-        saturationColor = 0.0
     }
 
     Component.onCompleted: {
@@ -924,12 +916,10 @@ QtObject {
             var profileIndex = getProfileIndexByName(args[profileArgPosition + 1])
             if (profileIndex !== -1) {
                 loadProfile(profileIndex)
+                explicitProfileSelected = true
             } else {
                 console.log("Warning: selected profile is not valid; ignoring it")
             }
-        } else {
-            // No explicit profile requested: color follows the active tool.
-            applyToolColorScheme()
         }
 
         initializedSettings()
