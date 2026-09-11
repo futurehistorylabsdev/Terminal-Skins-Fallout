@@ -25,6 +25,7 @@ import "utils.js" as Utils
 ShaderTerminal {
     property alias title: terminal.title
     property alias terminalSize: terminal.terminalSize
+    property alias mainTerminal: terminal.mainTerminal
     property bool isActive: false
     signal sessionFinished()
 

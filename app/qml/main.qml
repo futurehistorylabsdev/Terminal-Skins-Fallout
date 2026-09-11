@@ -46,6 +46,12 @@ QtObject {
 
     property ListModel windowsModel: ListModel { }
 
+    property Binding pttCommandBinding: Binding {
+        target: pushToTalk
+        property: "transcribeCommand"
+        value: appSettings.speechToTextCommand
+    }
+
     function createWindow() {
         var window = windowComponent.createObject(null)
         if (!window)

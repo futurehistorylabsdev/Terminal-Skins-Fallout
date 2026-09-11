@@ -5,6 +5,7 @@
 #include <QStringList>
 
 #include <QDir>
+#include <QStandardPaths>
 
 #include <QtWidgets/QApplication>
 #include <QIcon>
@@ -21,6 +22,7 @@
 #include <fileio.h>
 #include <fontlistmodel.h>
 #include <fontmanager.h>
+#include <pushtotalk.h>
 
 #if defined(Q_OS_MAC)
 #include <CoreFoundation/CoreFoundation.h>
@@ -68,6 +70,7 @@ int main(int argc, char *argv[])
         cout << "  --default-settings  Run cool-retro-term with the default settings" << Qt::endl;
         cout << "  --workdir <dir>     Change working directory to 'dir'" << Qt::endl;
         cout << "  -e <cmd>            Command to execute. This option will catch all following arguments, so use it as the last option." << Qt::endl;
+        cout << "                      Defaults to `claude` when it's on PATH and no -e is given." << Qt::endl;
         cout << "  --fullscreen        Run cool-retro-term in fullscreen." << Qt::endl;
         cout << "  -p|--profile <prof> Run cool-retro-term with the given profile." << Qt::endl;
         cout << "  -h|--help           Print this help." << Qt::endl;
@@ -122,13 +125,29 @@ int main(int argc, char *argv[])
         cmdList << args.mid(args.indexOf("-e") + 1);
     }
     QVariant command(cmdList.empty() ? QVariant() : cmdList[0]);
-    QVariant commandArgs(cmdList.size() <= 1 ? QVariant() : QVariant(cmdList.mid(1)));
+    // A plain QStringList (rather than an invalid QVariant) so that
+    // ksession.setArgs() always gets a value it can convert, even for a
+    // single-word command with no extra arguments (e.g. "-e claude", or the
+    // implicit "claude" default below).
+    QVariant commandArgs(cmdList.size() <= 1 ? QVariant(QStringList()) : QVariant(cmdList.mid(1)));
+
+    // This is meant to be a dedicated skin for using Claude Code: with no
+    // explicit "-e" override, launch `claude` directly if it's on PATH.
+    // Falls back to the normal shell (cool-retro-term's original behavior)
+    // if it isn't found, so the app still works as a plain terminal.
+    if (cmdList.empty() && !QStandardPaths::findExecutable(QStringLiteral("claude")).isEmpty()) {
+        command = QVariant(QStringLiteral("claude"));
+    }
+
     engine.rootContext()->setContextProperty("appVersion", appVersion);
     engine.rootContext()->setContextProperty("defaultCmd", command);
     engine.rootContext()->setContextProperty("defaultCmdArgs", commandArgs);
 
     engine.rootContext()->setContextProperty("workdir", getNamedArgument(args, "--workdir", QDir::currentPath()));
     engine.rootContext()->setContextProperty("fileIO", &fileIO);
+
+    PushToTalk pushToTalk;
+    engine.rootContext()->setContextProperty("pushToTalk", &pushToTalk);
 
     // Manage import paths for Linux and OSX.
     QStringList importPathList = engine.importPathList();

@@ -53,6 +53,11 @@ QtObject {
 
     property bool blinkingCursor: false
 
+    // PUSH-TO-TALK ///////////////////////////////////////////////////////////
+    // Shell command run on the recorded audio clip to transcribe it. Use
+    // "%f" for the WAV file path, or leave it out and the path is appended.
+    // Push-to-talk stays disabled until this is set.
+    property string speechToTextCommand: ""
 
     // PROFILE SETTINGS ///////////////////////////////////////////////////////
     property real windowOpacity: 1.0
@@ -167,7 +172,8 @@ QtObject {
             "bloomQuality": bloomQuality,
             "burnInQuality": burnInQuality,
             "useCustomCommand": useCustomCommand,
-            "customCommand": customCommand
+            "customCommand": customCommand,
+            "speechToTextCommand": speechToTextCommand
         }
         return stringify(settings)
     }
@@ -261,6 +267,8 @@ QtObject {
                 !== undefined ? settings.useCustomCommand : useCustomCommand
         customCommand = settings.customCommand
                 !== undefined ? settings.customCommand : customCommand
+        speechToTextCommand = settings.speechToTextCommand
+                !== undefined ? settings.speechToTextCommand : speechToTextCommand
     }
 
     function loadProfileString(profileString) {

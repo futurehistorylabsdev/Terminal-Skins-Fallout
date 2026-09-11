@@ -1,4 +1,75 @@
-# cool-retro-term
+# claude-retro-term
+
+A fork of [cool-retro-term](https://github.com/Swordfish90/cool-retro-term)
+(the CRT-styled Qt terminal emulator) set up as a dedicated skin for
+**Claude Code**: it launches `claude` by default, and adds a large prompt
+composer under the terminal plus a push-to-talk microphone.
+
+## What's different from upstream
+
+- **Launches `claude` by default.** If `claude` is on `PATH` and you don't
+  pass `-e`, it runs that instead of your shell. Falls back to a normal
+  shell if `claude` isn't found, so it still works as a plain terminal.
+- **A prompt bar under the terminal.** A large, multi-line text box styled
+  to match whichever CRT color profile is active. Enter sends the text into
+  the running session exactly as if you'd typed it directly into the
+  terminal (Shift+Enter for a newline). The terminal above still behaves
+  like a normal terminal — you can type/scroll/Ctrl+C there directly too.
+- **Push-to-talk.** Hold **Ctrl+Space** anywhere in the window, or
+  press-and-hold the mic button in the prompt bar, to record from the
+  microphone; release to transcribe and drop the text into the prompt box.
+  The chord is caught application-wide (not a QML shortcut), specifically
+  because the terminal widget normally consumes every keystroke itself —
+  a bare Space, or Ctrl combined with any other key, is untouched and
+  behaves exactly as it always did.
+- **A Qt 6.4 shader-baking compatibility fix.** Upstream's checked-in
+  `.qsb` shader binaries are baked for Qt 6.5+; this fork regenerates them
+  without the newer `--qt6` flag so it also builds and runs on Qt 6.4 (e.g.
+  stock Ubuntu 24.04), in addition to newer Qt6. One `QRegularExpression`
+  compatibility fix in `qmltermwidget` for the same reason.
+
+### Push-to-talk needs a speech-to-text command
+
+There's no bundled transcription engine — push-to-talk records a WAV clip
+and hands it to a command you configure yourself, in **Settings →
+Advanced → Push-to-talk**. Use `%f` in the command for the recorded file's
+path (or leave it out and the path is appended). For example, with
+[whisper.cpp](https://github.com/ggml-org/whisper.cpp):
+
+```
+whisper-cli -m /path/to/ggml-base.en.bin -f %f --no-timestamps -otxt -of -
+```
+
+Until that's set, the mic button still shows you when the chord is caught
+(so you can confirm the shortcut works), but says so instead of recording.
+
+## Requirements & building
+
+Same as upstream: **Linux or macOS, Qt6** (this fork also runs on Qt 6.4).
+Needs the `multimedia` Qt module additionally (for the mic).
+
+```bash
+git clone <this repo>
+cd claude-retro-term
+qmake6 cool-retro-term.pro   # or qmake, depending on your distro
+make -j$(nproc)
+./cool-retro-term
+```
+
+`-e <cmd>` still works exactly as in upstream, to launch something other
+than `claude`:
+
+```bash
+./cool-retro-term -e zsh
+```
+
+## Everything else
+
+This fork otherwise keeps all of cool-retro-term's own features (CRT
+shader effects, color profiles, fonts, tabs, settings) — see below for
+upstream's own documentation.
+
+---
 
 |> Default Amber|C:\ IBM DOS|$ Default Green|
 |---|---|---|

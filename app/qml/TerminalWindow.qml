@@ -20,6 +20,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
+import QtQuick.Layouts
 
 import "menus"
 
@@ -168,10 +169,23 @@ ApplicationWindow {
         context: Qt.WindowShortcut
         onActivated: if (terminalTabs.count > 8) terminalTabs.currentIndex = 8
     }
-    TerminalTabs {
-        id: terminalTabs
+    ColumnLayout {
         width: parent.width
         height: (parent.height + Math.abs(y))
+        spacing: 0
+
+        TerminalTabs {
+            id: terminalTabs
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+        }
+
+        PromptBar {
+            id: promptBar
+            Layout.fillWidth: true
+            session: (terminalTabs.currentTerminalContainer && terminalTabs.currentTerminalContainer.mainTerminal)
+                     ? terminalTabs.currentTerminalContainer.mainTerminal.session : null
+        }
     }
     Loader {
         anchors.centerIn: parent

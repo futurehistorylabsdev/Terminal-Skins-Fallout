@@ -30,6 +30,7 @@ Item {
     property alias currentIndex: tabBar.currentIndex
     readonly property int count: tabsModel.count
     property size terminalSize: Qt.size(0, 0)
+    readonly property Item currentTerminalContainer: stack.itemAt(stack.currentIndex)
 
     function normalizeTitle(rawTitle) {
         if (rawTitle === undefined || rawTitle === null) {

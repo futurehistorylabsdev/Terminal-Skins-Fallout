@@ -70,6 +70,37 @@ ColumnLayout {
     }
 
     GroupBox {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        title: qsTr("Push-to-talk")
+        padding: appSettings.defaultMargin
+
+        ColumnLayout {
+            anchors.fill: parent
+
+            Label {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: qsTr("Hold Ctrl+Space (or the mic button in the prompt bar) to record, then this command runs on the clip and its output is dropped into the prompt. Use \"%f\" for the recorded WAV path, or leave it out to have the path appended. Leave blank to disable.")
+                opacity: 0.75
+            }
+            TextField {
+                id: speechToTextCommand
+                Layout.fillWidth: true
+                placeholderText: qsTr("e.g. whisper-cli -m ./ggml-base.en.bin -f %f --no-timestamps")
+                text: appSettings.speechToTextCommand
+                onEditingFinished: appSettings.speechToTextCommand = text
+
+                function saveSetting() {
+                    appSettings.speechToTextCommand = text
+                }
+                Component.onCompleted: settings_window.closing.connect(
+                                           saveSetting)
+            }
+        }
+    }
+
+    GroupBox {
         title: qsTr("Performance")
         Layout.fillWidth: true
         Layout.fillHeight: true
