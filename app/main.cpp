@@ -5,6 +5,7 @@
 #include <QStringList>
 
 #include <QDir>
+#include <QFileInfo>
 #include <QStandardPaths>
 
 #include <QtWidgets/QApplication>
@@ -70,9 +71,12 @@ int main(int argc, char *argv[])
         cout << "  --default-settings  Run cool-retro-term with the default settings" << Qt::endl;
         cout << "  --workdir <dir>     Change working directory to 'dir'" << Qt::endl;
         cout << "  -e <cmd>            Command to execute. This option will catch all following arguments, so use it as the last option." << Qt::endl;
-        cout << "                      Defaults to `claude` when it's on PATH and no -e is given." << Qt::endl;
+        cout << "                      Defaults to `claude` when it's on PATH, else `codex`, if no -e is given." << Qt::endl;
+        cout << "                      The color scheme follows whichever of those actually runs (orange for" << Qt::endl;
+        cout << "                      claude, classic green for codex, white for anything else) unless -p/--profile" << Qt::endl;
+        cout << "                      is given explicitly." << Qt::endl;
         cout << "  --fullscreen        Run cool-retro-term in fullscreen." << Qt::endl;
-        cout << "  -p|--profile <prof> Run cool-retro-term with the given profile." << Qt::endl;
+        cout << "  -p|--profile <prof> Run cool-retro-term with the given profile (overrides the tool-based color)." << Qt::endl;
         cout << "  -h|--help           Print this help." << Qt::endl;
         cout << "  --verbose           Print additional information such as profiles and settings." << Qt::endl;
         return 0;
@@ -131,17 +135,36 @@ int main(int argc, char *argv[])
     // implicit "claude" default below).
     QVariant commandArgs(cmdList.size() <= 1 ? QVariant(QStringList()) : QVariant(cmdList.mid(1)));
 
-    // This is meant to be a dedicated skin for using Claude Code: with no
-    // explicit "-e" override, launch `claude` directly if it's on PATH.
+    // This is meant to be a dedicated skin for AI coding CLIs: with no
+    // explicit "-e" override, launch `claude` if it's on PATH, else `codex`.
     // Falls back to the normal shell (cool-retro-term's original behavior)
-    // if it isn't found, so the app still works as a plain terminal.
-    if (cmdList.empty() && !QStandardPaths::findExecutable(QStringLiteral("claude")).isEmpty()) {
-        command = QVariant(QStringLiteral("claude"));
+    // if neither is found, so the app still works as a plain terminal.
+    if (cmdList.empty()) {
+        if (!QStandardPaths::findExecutable(QStringLiteral("claude")).isEmpty()) {
+            command = QVariant(QStringLiteral("claude"));
+        } else if (!QStandardPaths::findExecutable(QStringLiteral("codex")).isEmpty()) {
+            command = QVariant(QStringLiteral("codex"));
+        }
+    }
+
+    // Which CLI is actually running picks the color scheme: orange for
+    // Claude, classic monochrome green for Codex, and a third color for
+    // anything else (a plain shell, or whatever else -e launches) — same
+    // CRT effect settings throughout, just a different phosphor color.
+    const QString resolvedCommandName = command.isValid()
+        ? QFileInfo(command.toString()).fileName()
+        : QString();
+    QString activeTool = QStringLiteral("other");
+    if (resolvedCommandName.compare(QStringLiteral("claude"), Qt::CaseInsensitive) == 0) {
+        activeTool = QStringLiteral("claude");
+    } else if (resolvedCommandName.compare(QStringLiteral("codex"), Qt::CaseInsensitive) == 0) {
+        activeTool = QStringLiteral("codex");
     }
 
     engine.rootContext()->setContextProperty("appVersion", appVersion);
     engine.rootContext()->setContextProperty("defaultCmd", command);
     engine.rootContext()->setContextProperty("defaultCmdArgs", commandArgs);
+    engine.rootContext()->setContextProperty("activeTool", activeTool);
 
     engine.rootContext()->setContextProperty("workdir", getNamedArgument(args, "--workdir", QDir::currentPath()));
     engine.rootContext()->setContextProperty("fileIO", &fileIO);

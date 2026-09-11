@@ -862,6 +862,23 @@ QtObject {
         return -1
     }
 
+    // Which phosphor color to use for which CLI, keeping everything else
+    // (curvature, scanlines, bloom, burn-in...) exactly as configured —
+    // only the color changes. "activeTool" is set by main.cpp from
+    // whichever command actually ends up running.
+    readonly property var toolColors: ({
+        "claude": "#ff8100",
+        "codex": "#39ff14",
+        "other": "#e8e8e8"
+    })
+
+    function applyToolColorScheme() {
+        var tool = (typeof activeTool !== "undefined" && toolColors[activeTool]) ? activeTool : "other"
+        _fontColor = toolColors[tool]
+        chromaColor = 0.0
+        saturationColor = 0.0
+    }
+
     Component.onCompleted: {
         // Manage the arguments from the QML side.
         var args = Qt.application.arguments
@@ -882,6 +899,9 @@ QtObject {
             } else {
                 console.log("Warning: selected profile is not valid; ignoring it")
             }
+        } else {
+            // No explicit profile requested: color follows the active tool.
+            applyToolColorScheme()
         }
 
         initializedSettings()

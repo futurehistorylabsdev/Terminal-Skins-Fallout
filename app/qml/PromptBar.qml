@@ -25,7 +25,7 @@ Rectangle {
     readonly property color housingLight: Qt.lighter(housingColor, 1.6)
     readonly property color metalHi: "#cfd0b8"
     readonly property color metalLo: "#4a4a3e"
-    readonly property color termGreen: appSettings.fontColor
+    readonly property color termColor: appSettings.fontColor
 
     implicitHeight: 210
     radius: 3
@@ -52,7 +52,14 @@ Rectangle {
         opacity: 0.35
     }
 
-    // Backlit terminal-style title readout.
+    // Backlit terminal-style title readout — reflects whichever CLI is
+    // actually running.
+    readonly property string toolLabel: {
+        var tool = typeof activeTool !== "undefined" ? activeTool : "other"
+        if (tool === "claude") return "C L A U D E   T E R M - L I N K"
+        if (tool === "codex") return "C O D E X   T E R M - L I N K"
+        return "T E R M - L I N K"
+    }
     Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -60,7 +67,7 @@ Rectangle {
         width: plateLabel.width
         height: plateLabel.height
         Text {
-            text: "C L A U D E   T E R M - L I N K"
+            text: root.toolLabel
             font.family: "monospace"
             font.bold: true
             font.pixelSize: 10
@@ -70,11 +77,11 @@ Rectangle {
         }
         Text {
             id: plateLabel
-            text: "C L A U D E   T E R M - L I N K"
+            text: root.toolLabel
             font.family: "monospace"
             font.bold: true
             font.pixelSize: 10
-            color: root.termGreen
+            color: root.termColor
             opacity: 0.85
         }
     }
@@ -178,7 +185,7 @@ Rectangle {
 
             Label {
                 text: qsTr("MESSAGE")
-                color: root.termGreen
+                color: root.termColor
                 opacity: 0.75
                 font.family: "monospace"
                 font.bold: true
@@ -257,7 +264,7 @@ Rectangle {
             Label {
                 text: root.ptt ? pushToTalk.statusMessage : ""
                 visible: text.length > 0
-                color: root.termGreen
+                color: root.termColor
                 opacity: 0.85
                 font.family: "monospace"
                 font.pixelSize: 10
@@ -405,7 +412,7 @@ Rectangle {
                 Label {
                     Layout.alignment: Qt.AlignHCenter
                     text: qsTr("PRESS TO TALK")
-                    color: root.termGreen
+                    color: root.termColor
                     opacity: 0.8
                     font.family: "monospace"
                     font.bold: true
@@ -431,8 +438,8 @@ Rectangle {
                 width: 68
                 height: 30
                 radius: 3
-                color: sendArea.pressed ? Qt.darker(root.termGreen, 6) : root.housingDark
-                border.color: root.termGreen
+                color: sendArea.pressed ? Qt.darker(root.termColor, 6) : root.housingDark
+                border.color: root.termColor
                 border.width: sendArea.pressed ? 2 : 1
                 opacity: sendArea.pressed ? 1.0 : 0.9
 
@@ -442,7 +449,7 @@ Rectangle {
                     font.family: "monospace"
                     font.bold: true
                     font.pixelSize: 11
-                    color: root.termGreen
+                    color: root.termColor
                 }
 
                 MouseArea {
