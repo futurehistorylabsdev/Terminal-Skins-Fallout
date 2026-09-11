@@ -3,9 +3,10 @@
  * by Filippo Scognamiglio. Licensed under the GNU General Public License,
  * version 3 (or, at your option, any later version) — see gpl-3.0.txt.
  *
- * Modified 2026 by Future History Labs: default-launch `claude`/`codex`
- * when found on PATH and no -e is given, and expose "activeTool" plus
- * the PushToTalk object to QML.
+ * Modified 2026 by Future History Labs: expose "activeTool" and the
+ * PushToTalk object to QML. Every window/tab starts at a plain shell;
+ * ApplicationSettings.qml's live process-name poller picks the color as
+ * soon as the user actually runs `claude` or `codex` in it.
  */
 #include <QtQml/QQmlApplicationEngine>
 #include <QtGui/QGuiApplication>
@@ -16,7 +17,6 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QProcess>
-#include <QStandardPaths>
 
 #include <QtWidgets/QApplication>
 #include <QIcon>
@@ -81,10 +81,10 @@ int main(int argc, char *argv[])
         cout << "  --default-settings  Run cool-retro-term with the default settings" << Qt::endl;
         cout << "  --workdir <dir>     Change working directory to 'dir'" << Qt::endl;
         cout << "  -e <cmd>            Command to execute. This option will catch all following arguments, so use it as the last option." << Qt::endl;
-        cout << "                      Defaults to `claude` when it's on PATH, else `codex`, if no -e is given." << Qt::endl;
-        cout << "                      The color scheme follows whichever of those actually runs (orange for" << Qt::endl;
-        cout << "                      claude, classic green for codex, white for anything else) unless -p/--profile" << Qt::endl;
-        cout << "                      is given explicitly." << Qt::endl;
+        cout << "                      Defaults to the normal shell if no -e is given - just run `claude` or `codex`" << Qt::endl;
+        cout << "                      yourself once it's open. The color scheme follows whichever of those actually" << Qt::endl;
+        cout << "                      runs (orange for claude, classic green for codex, white for anything else)" << Qt::endl;
+        cout << "                      live, unless -p/--profile is given explicitly." << Qt::endl;
         cout << "  --fullscreen        Run cool-retro-term in fullscreen." << Qt::endl;
         cout << "  -p|--profile <prof> Run cool-retro-term with the given profile (overrides the tool-based color)." << Qt::endl;
         cout << "  -h|--help           Print this help." << Qt::endl;
@@ -126,10 +126,11 @@ int main(int argc, char *argv[])
     // doesn't include whatever a shell profile (.zshrc/.zprofile) adds -
     // Homebrew, nvm, ~/.local/bin, etc. Resolve the real PATH by asking
     // the user's actual login shell for it and adopt it as our own, so
-    // both the claude/codex auto-detection below and every pty session
-    // this app launches (including an explicit "-e <shell>") see the
-    // same PATH a normal Terminal window would have. Every child process
-    // spawned from here on inherits this corrected environment.
+    // every pty session this app launches (the default shell, an explicit
+    // "-e <cmd>", and whatever the user runs inside either) sees the same
+    // PATH a normal Terminal window would have - including finding `claude`
+    // and `codex` when the user types them. Every child process spawned
+    // from here on inherits this corrected environment.
     {
         QProcess shellProc;
         const QString shell = qEnvironmentVariable("SHELL", QStringLiteral("/bin/zsh"));
@@ -169,26 +170,25 @@ int main(int argc, char *argv[])
     QVariant command(cmdList.empty() ? QVariant() : cmdList[0]);
     // A plain QStringList (rather than an invalid QVariant) so that
     // ksession.setArgs() always gets a value it can convert, even for a
-    // single-word command with no extra arguments (e.g. "-e claude", or the
-    // implicit "claude" default below).
+    // single-word command with no extra arguments (e.g. "-e claude").
     QVariant commandArgs(cmdList.size() <= 1 ? QVariant(QStringList()) : QVariant(cmdList.mid(1)));
 
-    // This is meant to be a dedicated skin for AI coding CLIs: with no
-    // explicit "-e" override, launch `claude` if it's on PATH, else `codex`.
-    // Falls back to the normal shell (cool-retro-term's original behavior)
-    // if neither is found, so the app still works as a plain terminal.
-    if (cmdList.empty()) {
-        if (!QStandardPaths::findExecutable(QStringLiteral("claude")).isEmpty()) {
-            command = QVariant(QStringLiteral("claude"));
-        } else if (!QStandardPaths::findExecutable(QStringLiteral("codex")).isEmpty()) {
-            command = QVariant(QStringLiteral("codex"));
-        }
-    }
+    // Modified 2026 by Future History Labs: every window/tab starts at the
+    // normal shell (cmdList/command left empty here) rather than auto-
+    // launching claude/codex directly. Launching either of those straight
+    // away meant a fresh window landed inside its own interactive session -
+    // typing "codex" there just sent Claude a chat message instead of
+    // running a `codex` process, so the color never switched. Starting at
+    // a shell instead means the live process-name poller in
+    // ApplicationSettings.qml always has a real process to detect the
+    // moment the user runs `claude` or `codex` themselves - the same way
+    // switching between the two already works within one running session.
+    // An explicit "-e claude"/"-e codex" still launches that tool directly.
 
     // Which CLI is actually running picks the color scheme: orange for
     // Claude, classic monochrome green for Codex, and a third color for
-    // anything else (a plain shell, or whatever else -e launches) — same
-    // CRT effect settings throughout, just a different phosphor color.
+    // anything else (the default shell, or whatever else -e launches) —
+    // same CRT effect settings throughout, just a different phosphor color.
     const QString resolvedCommandName = command.isValid()
         ? QFileInfo(command.toString()).fileName()
         : QString();
