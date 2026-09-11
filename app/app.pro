@@ -1,6 +1,7 @@
 # Part of cool-retro-term (https://github.com/Swordfish90/cool-retro-term),
 # GPLv3-or-later. Modified 2026 by Future History Labs: added the
-# `multimedia` module and pushtotalk.cpp/.h for push-to-talk.
+# `multimedia` module and pushtotalk.cpp/.h for push-to-talk, and a custom
+# Info.plist so the app identifies itself as "FHL-Fallout" on macOS.
 QT += qml quick widgets sql quickcontrols2 multimedia
 TARGET = cool-retro-term
 APP_VERSION = $$system(git -C $$PWD/.. describe --tags --always --dirty=-dirty)
@@ -33,6 +34,10 @@ SOURCES += main.cpp \
     pushtotalk.cpp
 
 macx:ICON = icons/crt.icns
+# Modified 2026 by Future History Labs: custom Info.plist so the Dock,
+# Cmd+Tab, Finder and Spotlight show "FHL-Fallout" (they read bundle
+# metadata directly, not QGuiApplication::applicationDisplayName()).
+macx:QMAKE_INFO_PLIST = Info.plist
 
 RESOURCES += qml/resources.qrc
 

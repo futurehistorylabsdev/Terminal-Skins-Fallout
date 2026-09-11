@@ -2,6 +2,10 @@
 * Copyright (c) 2013-2021 "Filippo Scognamiglio"
 * https://github.com/Swordfish90/cool-retro-term
 *
+* Modified 2026 by Future History Labs: rebranded the heading, and credited
+* this fork's modifications alongside the original author, both here and in
+* the license panel.
+*
 * This file is part of cool-retro-term.
 *
 * cool-retro-term is free software: you can redistribute it and/or modify
@@ -34,12 +38,19 @@ ApplicationWindow {
         spacing: 15
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "cool-retro-term"
+            text: "FHL-Fallout"
             color: palette.text
             font {
                 bold: true
                 pointSize: 18
             }
+        }
+        Text {
+            Layout.alignment: Qt.AlignHCenter
+            text: qsTr("A Future History Labs skin for cool-retro-term")
+            color: palette.text
+            opacity: 0.75
+            font.pointSize: 11
         }
         Loader {
             id: mainContent
@@ -100,7 +111,10 @@ ApplicationWindow {
                 Layout.alignment: Qt.AlignCenter
                 horizontalAlignment: Text.AlignHCenter
                 color: palette.text
-                text: appSettings.version + "\n" + qsTr(
+                text: appSettings.version + "\n\n" + qsTr(
+                          "Fork by: ") + "Future History Labs\n" + qsTr(
+                          "Source: ") + "https://github.com/futurehistorylabsdev/Terminal-Skins-Fallout\n\n" + qsTr(
+                          "Based on cool-retro-term\n") + qsTr(
                           "Author: ") + "Filippo Scognamiglio\n" + qsTr(
                           "Email: ") + "flscogna@gmail.com\n" + qsTr(
                           "Source: ") + "https://github.com/Swordfish90/cool-retro-term\n"
@@ -127,7 +141,13 @@ ApplicationWindow {
                       + "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the "
                       + "GNU General Public License for more details.\n\n" +
                       "You should have received a copy of the GNU General Public License "
-                      + "along with this program.  If not, see <http://www.gnu.org/licenses/>."
+                      + "along with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n"
+                      + "-----\n\n"
+                      + "This FHL-Fallout fork's modifications are Copyright (c) 2026 Future "
+                      + "History Labs, licensed under the same GNU General Public License as "
+                      + "above (GPL is copyleft: a derivative work can't be relicensed to "
+                      + "something more permissive).\n\n"
+                      + "https://github.com/futurehistorylabsdev/Terminal-Skins-Fallout"
             }
         }
     }
