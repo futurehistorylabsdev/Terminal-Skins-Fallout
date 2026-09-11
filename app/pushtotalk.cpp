@@ -10,7 +10,7 @@
 
 #include <QCoreApplication>
 #include <QKeyEvent>
-#include <QMicrophonePermission>
+#include <QtCore/qpermissions.h>
 #include <QStandardPaths>
 #include <QDir>
 #include <QDateTime>
