@@ -1,3 +1,5 @@
+<!-- Part of cool-retro-term (GPLv3-or-later). Modified 2026 by Future
+     History Labs: added PromptBar.qml to the resource list. -->
 <RCC>
     <qresource prefix="/">
         <file>SizeOverlay.qml</file>

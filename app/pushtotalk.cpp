@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2026 Future History Labs
+ *
+ * New file added to this fork of cool-retro-term
+ * (https://github.com/Swordfish90/cool-retro-term). Licensed under the
+ * GNU General Public License, version 3 (or, at your option, any later
+ * version), same as the rest of this program — see gpl-3.0.txt.
+ */
 #include "pushtotalk.h"
 
 #include <QCoreApplication>

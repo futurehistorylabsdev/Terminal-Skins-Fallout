@@ -1,3 +1,12 @@
+/*
+ * This file is part of cool-retro-term (https://github.com/Swordfish90/cool-retro-term),
+ * by Filippo Scognamiglio. Licensed under the GNU General Public License,
+ * version 3 (or, at your option, any later version) — see gpl-3.0.txt.
+ *
+ * Modified 2026 by Future History Labs: default-launch `claude`/`codex`
+ * when found on PATH and no -e is given, and expose "activeTool" plus
+ * the PushToTalk object to QML.
+ */
 #include <QtQml/QQmlApplicationEngine>
 #include <QtGui/QGuiApplication>
 

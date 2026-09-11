@@ -2,6 +2,9 @@
 * Copyright (c) 2013-2021 "Filippo Scognamiglio"
 * https://github.com/Swordfish90/cool-retro-term
 *
+* Modified 2026 by Future History Labs: added "currentTerminalContainer"
+* so the active tab's session is reachable from TerminalWindow.qml.
+*
 * This file is part of cool-retro-term.
 *
 * cool-retro-term is free software: you can redistribute it and/or modify

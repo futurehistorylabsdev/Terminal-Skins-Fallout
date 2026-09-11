@@ -69,6 +69,31 @@ This fork otherwise keeps all of cool-retro-term's own features (CRT
 shader effects, color profiles, fonts, tabs, settings) — see below for
 upstream's own documentation.
 
+## License & attribution
+
+This is a derivative work, and stays under the same license as the
+project it's built on:
+
+- **[cool-retro-term](https://github.com/Swordfish90/cool-retro-term)**,
+  by Filippo Scognamiglio — GNU GPL v2/v3-or-later (`gpl-2.0.txt`,
+  `gpl-3.0.txt`). Everything in this repo not called out below is
+  upstream's, unmodified.
+- **[qmltermwidget](https://github.com/Swordfish90/qmltermwidget)**
+  (vendored in `qmltermwidget/`), also by Filippo Scognamiglio, itself
+  built on KDE's Konsole (Robert Knight, Lars Doelle, and other Konsole
+  contributors) — GPL/LGPL per file, see `qmltermwidget/LICENSE*`.
+- **[KDSingleApplication](https://github.com/KDAB/KDSingleApplication)**
+  (vendored in `KDSingleApplication/`), by Klarälvdalens Datakonsult AB
+  (KDAB) — MIT, see `KDSingleApplication/LICENSE.txt`.
+- **This fork's changes** — the tool-detected color scheme, the
+  intercom-styled prompt bar (`app/qml/PromptBar.qml`), push-to-talk
+  (`app/pushtotalk.cpp`/`.h`), the Qt 6.4 shader-baking fix, and the
+  default-launch behavior — © 2026 **Future History Labs**, licensed
+  under the same GPL as the rest of the program (GPL is copyleft: a
+  derivative work can't be relicensed to something more permissive).
+  Modified files carry a note saying so near their existing copyright
+  header; the new files carry their own header.
+
 ---
 
 |> Default Amber|C:\ IBM DOS|$ Default Green|

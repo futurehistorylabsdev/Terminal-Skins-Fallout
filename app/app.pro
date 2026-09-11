@@ -1,3 +1,6 @@
+# Part of cool-retro-term (https://github.com/Swordfish90/cool-retro-term),
+# GPLv3-or-later. Modified 2026 by Future History Labs: added the
+# `multimedia` module and pushtotalk.cpp/.h for push-to-talk.
 QT += qml quick widgets sql quickcontrols2 multimedia
 TARGET = cool-retro-term
 APP_VERSION = $$system(git -C $$PWD/.. describe --tags --always --dirty=-dirty)
