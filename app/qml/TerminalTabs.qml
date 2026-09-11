@@ -29,7 +29,7 @@ Item {
     id: tabsRoot
 
     readonly property int innerPadding: 6
-    readonly property string currentTitle: tabsModel.get(currentIndex).title ?? "cool-retro-term"
+    readonly property string currentTitle: tabsModel.get(currentIndex).title ?? "FHL-Fallout"
     property alias currentIndex: tabBar.currentIndex
     readonly property int count: tabsModel.count
     property size terminalSize: Qt.size(0, 0)

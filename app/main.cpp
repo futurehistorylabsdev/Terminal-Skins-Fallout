@@ -102,7 +102,13 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
     app.setAttribute(Qt::AA_MacDontSwapCtrlAndMeta, true);
+    // applicationName/organizationName intentionally left as
+    // "cool-retro-term" - that's the key QSettings uses to find this
+    // fork's saved profiles/settings, so changing it would silently
+    // orphan them. applicationDisplayName is the separate, purely
+    // cosmetic name shown in the macOS menu bar - safe to rebrand.
     app.setApplicationName(QStringLiteral("cool-retro-term"));
+    app.setApplicationDisplayName(QStringLiteral("FHL-Fallout"));
     app.setOrganizationName(QStringLiteral("cool-retro-term"));
     app.setOrganizationDomain(QStringLiteral("cool-retro-term"));
     app.setApplicationVersion(appVersion);
