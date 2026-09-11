@@ -18,15 +18,18 @@
 class QProcess;
 
 /**
- * Push-to-talk: hold Ctrl+Space anywhere in the app (or press-and-hold the
- * mic button) to record from the microphone, then run it through a
+ * Push-to-talk: hold Command+Option anywhere in the app (or press-and-hold
+ * the mic button) to record from the microphone, then run it through a
  * user-configured speech-to-text command and drop the transcript into the
  * prompt bar.
  *
- * The Ctrl+Space chord is caught with an application-wide event filter
+ * The Command+Option chord is caught with an application-wide event filter
  * rather than a QML Shortcut, because the terminal widget consumes almost
  * every keystroke itself (it has to, to support control sequences) and
- * would otherwise never let the chord reach a QML-level shortcut.
+ * would otherwise never let the chord reach a QML-level shortcut. Both keys
+ * of the chord are pure modifiers (Qt::Key_Meta/Qt::Key_Alt), so unlike the
+ * old Ctrl+Space combo there's no printable key to swallow — holding either
+ * modifier alone never sends a character into the terminal.
  */
 class PushToTalk : public QObject
 {
@@ -65,8 +68,8 @@ private:
     void setStatusMessage(const QString &message);
 
     bool m_active = false;
-    bool m_spaceDown = false;
-    bool m_ctrlDown = false;
+    bool m_metaDown = false;
+    bool m_altDown = false;
 
     QString m_transcribeCommand;
     QString m_statusMessage;

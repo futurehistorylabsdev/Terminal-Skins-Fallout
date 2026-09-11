@@ -13,7 +13,7 @@
 * typing here and pressing Enter sends the text into the running session
 * exactly as if it had been typed directly into the terminal above, and the
 * grille/switch cluster is just a big press area over the same
-* pushToTalk.startPushToTalk()/stopPushToTalk() calls (Ctrl+Space still
+* pushToTalk.startPushToTalk()/stopPushToTalk() calls (Command+Option still
 * works too, handled entirely on the C++ side).
 *******************************************************************************/
 import QtQuick

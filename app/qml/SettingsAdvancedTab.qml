@@ -84,7 +84,7 @@ ColumnLayout {
             Label {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                text: qsTr("Hold Ctrl+Space (or the mic button in the prompt bar) to record, then this command runs on the clip and its output is dropped into the prompt. Use \"%f\" for the recorded WAV path, or leave it out to have the path appended. Leave blank to disable.")
+                text: qsTr("Hold Command+Option (or the mic button in the prompt bar) to record, then this command runs on the clip and its output is dropped into the prompt. Use \"%f\" for the recorded WAV path, or leave it out to have the path appended. Leave blank to disable.")
                 opacity: 0.75
             }
             TextField {

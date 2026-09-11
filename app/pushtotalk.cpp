@@ -60,25 +60,18 @@ bool PushToTalk::eventFilter(QObject *watched, QEvent *event)
         auto *keyEvent = static_cast<QKeyEvent *>(event);
 
         if (!keyEvent->isAutoRepeat()) {
-            if (keyEvent->key() == Qt::Key_Control) {
-                m_ctrlDown = (type == QEvent::KeyPress);
-            } else if (keyEvent->key() == Qt::Key_Space) {
-                m_spaceDown = (type == QEvent::KeyPress);
+            if (keyEvent->key() == Qt::Key_Meta) {
+                m_metaDown = (type == QEvent::KeyPress);
+            } else if (keyEvent->key() == Qt::Key_Alt) {
+                m_altDown = (type == QEvent::KeyPress);
             }
 
-            const bool comboActive = m_spaceDown && m_ctrlDown;
+            const bool comboActive = m_metaDown && m_altDown;
             if (comboActive && !m_active) {
                 startPushToTalk();
             } else if (!comboActive && m_active) {
                 stopPushToTalk();
             }
-        }
-
-        // Swallow Space while Ctrl is held so the chord never reaches the
-        // terminal (or any text field) as a literal space character. A bare
-        // space, or Ctrl on its own, still behaves completely normally.
-        if (keyEvent->key() == Qt::Key_Space && m_ctrlDown) {
-            return true;
         }
     }
     return QObject::eventFilter(watched, event);
