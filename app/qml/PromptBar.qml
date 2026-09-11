@@ -20,6 +20,21 @@ Rectangle {
     readonly property bool ptt: typeof pushToTalk !== "undefined"
     readonly property bool listening: ptt && pushToTalk.active
 
+    // Poll the terminal's actual foreground process (qmltermwidget tracks
+    // this live via /proc, it just isn't a NOTIFY-able property) so the
+    // color scheme keeps following whatever you run inside a plain shell,
+    // not just what the app itself was launched with.
+    Timer {
+        interval: 600
+        running: root.session !== null
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            if (root.session)
+                appSettings.updateActiveToolFromProcessName(root.session.foregroundProcessName)
+        }
+    }
+
     readonly property color housingColor: "#4b4d3a"
     readonly property color housingDark: Qt.darker(housingColor, 2.1)
     readonly property color housingLight: Qt.lighter(housingColor, 1.6)
@@ -55,7 +70,7 @@ Rectangle {
     // Backlit terminal-style title readout — reflects whichever CLI is
     // actually running.
     readonly property string toolLabel: {
-        var tool = typeof activeTool !== "undefined" ? activeTool : "other"
+        var tool = appSettings.liveTool
         if (tool === "claude") return "C L A U D E   T E R M - L I N K"
         if (tool === "codex") return "C O D E X   T E R M - L I N K"
         return "T E R M - L I N K"

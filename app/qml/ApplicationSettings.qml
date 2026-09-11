@@ -864,16 +864,40 @@ QtObject {
 
     // Which phosphor color to use for which CLI, keeping everything else
     // (curvature, scanlines, bloom, burn-in...) exactly as configured —
-    // only the color changes. "activeTool" is set by main.cpp from
-    // whichever command actually ends up running.
+    // only the color changes. "activeTool" is set once by main.cpp from
+    // whichever command the app itself launched; "liveTool" tracks
+    // whatever is actually running in the terminal's foreground right
+    // now (see PromptBar's polling timer), so the scheme keeps following
+    // you if you start/stop claude or codex from inside a plain shell.
     readonly property var toolColors: ({
         "claude": "#ff8100",
         "codex": "#39ff14",
         "other": "#e8e8e8"
     })
 
+    property string liveTool: (typeof activeTool !== "undefined" && toolColors[activeTool]) ? activeTool : "other"
+
+    function detectToolFromProcessName(name) {
+        if (!name)
+            return "other"
+        var lower = String(name).toLowerCase()
+        if (lower.indexOf("claude") !== -1)
+            return "claude"
+        if (lower.indexOf("codex") !== -1)
+            return "codex"
+        return "other"
+    }
+
+    function updateActiveToolFromProcessName(name) {
+        var tool = detectToolFromProcessName(name)
+        if (tool === liveTool)
+            return
+        liveTool = tool
+        applyToolColorScheme()
+    }
+
     function applyToolColorScheme() {
-        var tool = (typeof activeTool !== "undefined" && toolColors[activeTool]) ? activeTool : "other"
+        var tool = toolColors[liveTool] ? liveTool : "other"
         _fontColor = toolColors[tool]
         chromaColor = 0.0
         saturationColor = 0.0
