@@ -21,7 +21,10 @@ class QProcess;
  * Push-to-talk: hold Command+Option anywhere in the app (or press-and-hold
  * the mic button) to record from the microphone, then run it through a
  * user-configured speech-to-text command and drop the transcript into the
- * prompt bar.
+ * prompt bar. startPushToTalk() explicitly checks/requests QMicrophonePermission
+ * before recording - Qt Multimedia never does this on its own, so without it
+ * the OS never even shows the permission prompt and capture just silently
+ * fails.
  *
  * The Command+Option chord is caught with an application-wide event filter
  * rather than a QML Shortcut, because the terminal widget consumes almost

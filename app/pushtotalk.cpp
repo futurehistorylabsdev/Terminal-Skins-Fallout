@@ -10,6 +10,7 @@
 
 #include <QCoreApplication>
 #include <QKeyEvent>
+#include <QMicrophonePermission>
 #include <QStandardPaths>
 #include <QDir>
 #include <QDateTime>
@@ -81,6 +82,31 @@ void PushToTalk::startPushToTalk()
 {
     if (m_active)
         return;
+
+    // Qt Multimedia links the platform's microphone-permission plugin
+    // automatically, but never calls it on its own - without this explicit
+    // check/request, QAudioInput just silently finds "not granted" and does
+    // nothing, and macOS never even shows the system prompt.
+    switch (qApp->checkPermission(QMicrophonePermission{})) {
+    case Qt::PermissionStatus::Undetermined:
+        setStatusMessage(tr("Requesting microphone access…"));
+        qApp->requestPermission(QMicrophonePermission{}, this, [this](const QPermission &permission) {
+            if (permission.status() == Qt::PermissionStatus::Granted) {
+                m_active = true;
+                emit activeChanged();
+                beginRecording();
+            } else {
+                setStatusMessage(tr("Microphone access denied. Enable it in System Settings → Privacy & Security → Microphone, then try again."));
+            }
+        });
+        return;
+    case Qt::PermissionStatus::Denied:
+        setStatusMessage(tr("Microphone access denied. Enable it in System Settings → Privacy & Security → Microphone, then try again."));
+        return;
+    case Qt::PermissionStatus::Granted:
+        break;
+    }
+
     m_active = true;
     emit activeChanged();
     beginRecording();
