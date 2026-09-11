@@ -863,60 +863,18 @@ public:
 
 private:
     virtual bool readProcInfo(int aPid) {
-        int managementInfoBase[4];
-        size_t mibLength;
-        struct kinfo_proc* kInfoProc;
-/*
-        KDE_struct_stat statInfo;
-
-        // Find the tty device of 'pid' (Example: /dev/ttys001)
-        managementInfoBase[0] = CTL_KERN;
-        managementInfoBase[1] = KERN_PROC;
-        managementInfoBase[2] = KERN_PROC_PID;
-        managementInfoBase[3] = aPid;
-
-        if (sysctl(managementInfoBase, 4, NULL, &mibLength, NULL, 0) == -1) {
+        // Modified 2026 by Future History Labs: the caller (Session::
+        // updateForegroundProcessInfo) already resolves the foreground
+        // pid correctly via tcgetpgrp (Pty::foregroundProcessGroup), so
+        // this just needs that pid's name - no need to re-derive it via
+        // the tty/kinfo_proc dance the old (disabled) code below did.
+        char nameBuffer[256] = {0};
+        if (proc_name(aPid, nameBuffer, sizeof(nameBuffer)) <= 0) {
             return false;
-        } else {
-            kInfoProc = new struct kinfo_proc [mibLength];
-            if (sysctl(managementInfoBase, 4, kInfoProc, &mibLength, NULL, 0) == -1) {
-                delete [] kInfoProc;
-                return false;
-            } else {
-                const QString deviceNumber = QString(devname(((&kInfoProc->kp_eproc)->e_tdev), S_IFCHR));
-                const QString fullDeviceName =  QString("/dev/") + deviceNumber.rightJustified(3, '0');
-                delete [] kInfoProc;
-
-                const QByteArray deviceName = fullDeviceName.toLatin1();
-                const char* ttyName = deviceName.data();
-
-                if (KDE::stat(ttyName, &statInfo) != 0)
-                    return false;
-
-                // Find all processes attached to ttyName
-                managementInfoBase[0] = CTL_KERN;
-                managementInfoBase[1] = KERN_PROC;
-                managementInfoBase[2] = KERN_PROC_TTY;
-                managementInfoBase[3] = statInfo.st_rdev;
-
-                mibLength = 0;
-                if (sysctl(managementInfoBase, sizeof(managementInfoBase) / sizeof(int), NULL, &mibLength, NULL, 0) == -1)
-                    return false;
-
-                kInfoProc = new struct kinfo_proc [mibLength];
-                if (sysctl(managementInfoBase, sizeof(managementInfoBase) / sizeof(int), kInfoProc, &mibLength, NULL, 0) == -1)
-                    return false;
-
-                // The foreground program is the first one
-                setName(QString(kInfoProc->kp_proc.p_comm));
-
-                delete [] kInfoProc;
-            }
-            setPid(aPid);
         }
+        setName(QString::fromUtf8(nameBuffer));
+        setPid(aPid);
         return true;
-*/
-        return false;
     }
 
     virtual bool readArguments(int aPid) {
