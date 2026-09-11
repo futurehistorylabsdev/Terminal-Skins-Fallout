@@ -15,6 +15,7 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QProcess>
 #include <QStandardPaths>
 
 #include <QtWidgets/QApplication>
@@ -113,6 +114,28 @@ int main(int argc, char *argv[])
             return 0;
         qWarning() << "KDSingleApplication: primary not reachable, continuing as independent instance.";
     }
+
+#if defined(Q_OS_MAC)
+    // GUI apps on macOS are launched by launchd with a minimal PATH that
+    // doesn't include whatever a shell profile (.zshrc/.zprofile) adds -
+    // Homebrew, nvm, ~/.local/bin, etc. Resolve the real PATH by asking
+    // the user's actual login shell for it and adopt it as our own, so
+    // both the claude/codex auto-detection below and every pty session
+    // this app launches (including an explicit "-e <shell>") see the
+    // same PATH a normal Terminal window would have. Every child process
+    // spawned from here on inherits this corrected environment.
+    {
+        QProcess shellProc;
+        const QString shell = qEnvironmentVariable("SHELL", QStringLiteral("/bin/zsh"));
+        shellProc.start(shell, {QStringLiteral("-ilc"), QStringLiteral("echo -n \"$PATH\"")});
+        if (shellProc.waitForFinished(3000)) {
+            const QString resolvedPath = QString::fromUtf8(shellProc.readAllStandardOutput()).trimmed();
+            if (!resolvedPath.isEmpty()) {
+                qputenv("PATH", resolvedPath.toUtf8());
+            }
+        }
+    }
+#endif
 
     QQmlApplicationEngine engine;
     FileIO fileIO;
