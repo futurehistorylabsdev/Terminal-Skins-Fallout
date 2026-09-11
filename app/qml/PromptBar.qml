@@ -21,6 +21,11 @@
 * effectiveFontColor/effectiveBackgroundColor/liveTool), not appSettings
 * directly, so each window's intercom panel follows that window's own
 * live claude/codex/other tool instead of a value shared across windows.
+* pushToTalk itself is still one shared C++ object (one microphone), so
+* listening/statusMessage/transcriptReady handling here is additionally
+* gated on terminalWindow.active - otherwise every open window lit its
+* lamp and received the transcript at once, with no way to tell which
+* window (if any) your speech was actually going to.
 *******************************************************************************/
 import QtQuick
 import QtQuick.Controls
@@ -31,7 +36,13 @@ Rectangle {
 
     property var session: null
     readonly property bool ptt: typeof pushToTalk !== "undefined"
-    readonly property bool listening: ptt && pushToTalk.active
+    // pushToTalk is one C++ object shared by every window (there's only one
+    // microphone), so its "active" state is the same everywhere. Gating on
+    // terminalWindow.active means only the window that's actually focused
+    // when you hold Command+Option shows itself as listening - otherwise
+    // every open window's lamp lit up together, with no way to tell which
+    // one (if any) your speech was actually going to.
+    readonly property bool listening: ptt && pushToTalk.active && terminalWindow.active
 
     // Poll the terminal's actual foreground process (qmltermwidget tracks
     // this live via /proc, it just isn't a NOTIFY-able property) so the
@@ -185,6 +196,12 @@ Rectangle {
     Connections {
         target: root.ptt ? pushToTalk : null
         function onTranscriptReady(text) {
+            // Same shared-object caveat as "listening" above: every window
+            // gets this signal, so only the focused one accepts the text -
+            // otherwise a transcript landed in every open window's prompt
+            // field at once.
+            if (!terminalWindow.active)
+                return
             const sep = promptField.text.length > 0 && !promptField.text.endsWith(" ") ? " " : ""
             promptField.text += sep + text
             promptField.cursorPosition = promptField.text.length
@@ -290,7 +307,7 @@ Rectangle {
             }
 
             Label {
-                text: root.ptt ? pushToTalk.statusMessage : ""
+                text: (root.ptt && terminalWindow.active) ? pushToTalk.statusMessage : ""
                 visible: text.length > 0
                 color: root.termColor
                 opacity: 0.85
