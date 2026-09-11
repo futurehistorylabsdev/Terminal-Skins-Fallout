@@ -20,13 +20,14 @@ Rectangle {
     readonly property bool ptt: typeof pushToTalk !== "undefined"
     readonly property bool listening: ptt && pushToTalk.active
 
-    readonly property color housingColor: "#3c3a36"
-    readonly property color housingDark: Qt.darker(housingColor, 1.9)
-    readonly property color housingLight: Qt.lighter(housingColor, 1.5)
-    readonly property color metalHi: "#d8d8d4"
-    readonly property color metalLo: "#4a4a46"
+    readonly property color housingColor: "#4b4d3a"
+    readonly property color housingDark: Qt.darker(housingColor, 2.1)
+    readonly property color housingLight: Qt.lighter(housingColor, 1.6)
+    readonly property color metalHi: "#cfd0b8"
+    readonly property color metalLo: "#4a4a3e"
+    readonly property color termGreen: appSettings.fontColor
 
-    implicitHeight: 200
+    implicitHeight: 210
     radius: 3
     border.color: housingDark
     border.width: 2
@@ -51,7 +52,7 @@ Rectangle {
         opacity: 0.35
     }
 
-    // Faint engraved title plate.
+    // Backlit terminal-style title readout.
     Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -59,22 +60,58 @@ Rectangle {
         width: plateLabel.width
         height: plateLabel.height
         Text {
-            text: "C L A U D E   I N T E R C O M"
-            font.family: "sans-serif"
+            text: "C L A U D E   T E R M - L I N K"
+            font.family: "monospace"
             font.bold: true
             font.pixelSize: 10
-            color: root.housingDark
+            color: "black"
             x: 1
             y: 1
         }
         Text {
             id: plateLabel
-            text: "C L A U D E   I N T E R C O M"
-            font.family: "sans-serif"
+            text: "C L A U D E   T E R M - L I N K"
+            font.family: "monospace"
             font.bold: true
             font.pixelSize: 10
-            color: root.housingLight
-            opacity: 0.8
+            color: root.termGreen
+            opacity: 0.85
+        }
+    }
+
+    // Hazard-stripe trim, top (clearly visible) and bottom (edge accent).
+    Item {
+        anchors { left: parent.left; right: parent.right; top: parent.top; topMargin: 17 }
+        height: 4
+        clip: true
+        Row {
+            anchors.fill: parent
+            Repeater {
+                model: 60
+                Rectangle {
+                    width: 9
+                    height: 30
+                    rotation: 45
+                    color: index % 2 === 0 ? "#e8b400" : "#141400"
+                }
+            }
+        }
+    }
+    Item {
+        anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+        height: 5
+        clip: true
+        Row {
+            anchors.fill: parent
+            Repeater {
+                model: 60
+                Rectangle {
+                    width: 9
+                    height: 30
+                    rotation: 45
+                    color: index % 2 === 0 ? "#e8b400" : "#141400"
+                }
+            }
         }
     }
 
@@ -130,6 +167,7 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 14
         anchors.topMargin: 22
+        anchors.bottomMargin: 18
         spacing: 14
 
         // ---- recessed "message slot" ----
@@ -140,9 +178,9 @@ Rectangle {
 
             Label {
                 text: qsTr("MESSAGE")
-                color: root.housingLight
-                opacity: 0.7
-                font.family: "sans-serif"
+                color: root.termGreen
+                opacity: 0.75
+                font.family: "monospace"
                 font.bold: true
                 font.pixelSize: 10
                 Layout.fillWidth: true
@@ -201,15 +239,27 @@ Rectangle {
                             }
                         }
                     }
+
+                    // Faint CRT scanlines over the message screen.
+                    Repeater {
+                        model: Math.max(0, Math.ceil(screen.height / 3))
+                        Rectangle {
+                            width: screen.width
+                            height: 1
+                            y: index * 3
+                            color: "black"
+                            opacity: 0.12
+                        }
+                    }
                 }
             }
 
             Label {
                 text: root.ptt ? pushToTalk.statusMessage : ""
                 visible: text.length > 0
-                color: root.housingLight
+                color: root.termGreen
                 opacity: 0.85
-                font.family: "sans-serif"
+                font.family: "monospace"
                 font.pixelSize: 10
                 Layout.fillWidth: true
                 elide: Text.ElideRight
@@ -355,9 +405,9 @@ Rectangle {
                 Label {
                     Layout.alignment: Qt.AlignHCenter
                     text: qsTr("PRESS TO TALK")
-                    color: root.housingLight
-                    opacity: 0.75
-                    font.family: "sans-serif"
+                    color: root.termGreen
+                    opacity: 0.8
+                    font.family: "monospace"
                     font.bold: true
                     font.pixelSize: 9
                 }
@@ -374,27 +424,25 @@ Rectangle {
 
             Item { Layout.fillHeight: true }
 
-            // Physical-looking send button.
+            // Physical-looking send button, lit like a terminal key.
             Rectangle {
                 id: sendButton
                 Layout.alignment: Qt.AlignHCenter
                 width: 68
                 height: 30
-                radius: 4
-                border.color: "black"
-                border.width: 1
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: sendArea.pressed ? "#6a6a66" : Qt.lighter(root.housingColor, 1.5) }
-                    GradientStop { position: 1.0; color: sendArea.pressed ? "#4a4a46" : root.housingColor }
-                }
+                radius: 3
+                color: sendArea.pressed ? Qt.darker(root.termGreen, 6) : root.housingDark
+                border.color: root.termGreen
+                border.width: sendArea.pressed ? 2 : 1
+                opacity: sendArea.pressed ? 1.0 : 0.9
 
                 Text {
                     anchors.centerIn: parent
                     text: qsTr("SEND")
-                    font.family: "sans-serif"
+                    font.family: "monospace"
                     font.bold: true
                     font.pixelSize: 11
-                    color: root.metalHi
+                    color: root.termGreen
                 }
 
                 MouseArea {

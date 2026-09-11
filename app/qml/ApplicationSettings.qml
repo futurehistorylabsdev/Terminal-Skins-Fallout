@@ -60,8 +60,12 @@ QtObject {
     property string speechToTextCommand: ""
 
     // PROFILE SETTINGS ///////////////////////////////////////////////////////
+    // Defaults tuned for a worn, monochrome-green wasteland-terminal look
+    // (green phosphor, no color fringing, a bit more scanline glow/burn-in)
+    // rather than upstream's amber default. Pick any other built-in profile
+    // from the context menu if you'd rather have that.
     property real windowOpacity: 1.0
-    property real ambientLight: 0.2
+    property real ambientLight: 0.3
     property real contrast: 0.80
     property real brightness: 0.5
 
@@ -69,8 +73,8 @@ QtObject {
     property string customCommand: ""
 
     property string _backgroundColor: "#000000"
-    property string _fontColor: "#ff8100"
-    property string _frameColor: "#ffffff"
+    property string _fontColor: "#39ff14"
+    property string _frameColor: "#c9c9b8"
     property string saturatedColor: Utils.mix(Utils.strToColor(_fontColor), Utils.strToColor("#FFFFFF"), (saturationColor * 0.5))
     property color fontColor: Utils.mix(Utils.strToColor(_backgroundColor), Utils.strToColor(saturatedColor), (0.7 + (contrast * 0.3)))
     property color backgroundColor: Utils.mix(Utils.strToColor(saturatedColor), Utils.strToColor(_backgroundColor), (0.7 + (contrast * 0.3)))
@@ -78,16 +82,16 @@ QtObject {
 
     property real staticNoise: 0.12
     property real screenCurvature: 0.3
-    property real glowingLine: 0.2
-    property real burnIn: 0.25
+    property real glowingLine: 0.25
+    property real burnIn: 0.3
     property real bloom: 0.55
 
-    property real chromaColor: 0.25
-    property real saturationColor: 0.25
+    property real chromaColor: 0.0
+    property real saturationColor: 0.0
 
     property real jitter: 0.2
 
-    property real horizontalSync: 0.08
+    property real horizontalSync: 0.1
     property real flickering: 0.1
 
     property real rgbShift: 0.0
